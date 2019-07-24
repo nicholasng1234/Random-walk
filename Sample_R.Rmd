@@ -1,0 +1,87 @@
+---
+title: "SampleProgrammingLiteracyTest"
+author: "Haocheng Ye"
+date: "7/13/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Part 1 - Simulate a random walk
+
+1.
+```{r}
+random_walk <- function(T, sigma, x_0){
+  ts <- data.frame()
+  ts <- rbind(ts, x_0)
+  x <- x_0
+  for(t in seq(1,T)){
+    w <- rbinom(1,1,0.5)
+    if(w == 0){
+      x <- x + sigma * -1
+    }
+    else{
+      x <- x + sigma * 1
+    }
+  ts <- rbind(ts, x)
+  }
+  names(ts) <- "x"
+  return(ts)
+}
+```
+
+2. (a)
+```{r}
+ts <- random_walk(60, 0.1, 1)
+ts
+
+```
+
+(b)
+```{r}
+pdf('928871024_path.pdf')
+plot(ts$x, type = 'l',
+     ylab = 'x', xlab = 'time',
+     main = 'Random Walk')
+dev.off()
+
+```
+
+Part II - Working with market data
+
+1.
+```{r}
+cpi <- read.csv("CPIAUCSL.csv")
+pr_diff <- diff(cpi$CPIAUCSL, lag = 1, difference = 1)
+pr_diff <- c(pr_diff, 0)
+cpi$diff <- pr_diff
+cpi$inflation <- cpi$diff / cpi$CPIAUCSL
+```
+
+2.
+I think the question is asking the dividing the sample into two continuous time periods, instead of randomly selecting.
+```{r}
+index <- nrow(cpi)/2
+cpi_1 <- cpi[1:index,]
+cpi_2 <- cpi[index+1:nrow(cpi),]
+cat("For first part of sample, the mean is ")
+mean(cpi_1$inflation) 
+cat(" and the standard deviation is ")
+sd(cpi_1$inflation)
+cat("For second part of sample, the mean is ")
+mean(cpi_2$inflation) 
+cat(" and the standard deviation is ")
+sd(cpi_2$inflation)
+
+```
+
+3.
+```{r}
+plot(cpi$inflation, pch = 18)
+abline(h = mean(cpi_1$inflation), col = 'red')
+abline(h = mean(cpi_2$inflation), col = 'blue')
+
+```
+
